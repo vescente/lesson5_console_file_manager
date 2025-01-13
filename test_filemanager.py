@@ -1,36 +1,33 @@
 import pytest
-import os
-import shutil
+import random
+from unittest.mock import patch
 
 # Пример чистых функций
-def test_calculate_sum():
-    from my_account import calculate_sum
-    assert calculate_sum(1, 2) == 3
-    assert calculate_sum(-1, 1) == 0
-    assert calculate_sum(0, 0) == 0
-
-def test_quiz_score():
-    from quiz import calculate_score
-    assert calculate_score([True, False, True]) == 2
-    assert calculate_score([False, False, False]) == 0
-    assert calculate_score([True, True, True]) == 3
+def test_get_random_person():
+    from play_quiz import get_random_person
+    FAMOUS_PEOPLE = {'Александр Сергеевич Пушкин': '26.06.1799', 'Михаил Юрьевич Лермонтов': '15.10.1814',
+                     'Сергей Александрович Есенин': '03.10.1895', 'Владимир Семенович Высоцкий': '25.01.1938',
+                     'Виктор Робертович Цой': '21.06.1962', 'Константин Эдуардович Циолковский': '17.09.1857',
+                     'Сергей Павлович Королев': '12.01.1907', 'Валентин Петрович Глушко': '20.08.1908',
+                     'Андрей Николаевич Туполев': '29.10.1888', 'Юрий Алексеевич Гагарин': '09.03.1934'}
+    
+    name, date = get_random_person()
+    assert name in FAMOUS_PEOPLE
+    assert date == FAMOUS_PEOPLE[name]
 
 # Пример грязных функций
-def test_copy_file(tmp_path):
-    src = tmp_path / "source.txt"
-    dest = tmp_path / "destination.txt"
-    src.write_text("Hello, world!")
-    
-    shutil.copy(src, dest)
-    
-    assert dest.read_text() == "Hello, world!"
+@patch('builtins.input', return_value='26.06.1799')
+@patch('play_quiz.get_random_person', return_value=('Александр Сергеевич Пушкин', '26.06.1799'))
+def test_play_quiz_correct(mock_get_random_person, mock_input, capsys):
+    from play_quiz import play_quiz
+    play_quiz()
+    captured = capsys.readouterr()
+    assert 'Верно' in captured.out
 
-def test_copy_directory(tmp_path):
-    src_dir = tmp_path / "src"
-    dest_dir = tmp_path / "dest"
-    src_dir.mkdir()
-    (src_dir / "file.txt").write_text("Hello, world!")
-    
-    shutil.copytree(src_dir, dest_dir)
-    
-    assert (dest_dir / "file.txt").read_text() == "Hello, world!"
+@patch('builtins.input', return_value='01.01.2000')
+@patch('play_quiz.get_random_person', return_value=('Александр Сергеевич Пушкин', '26.06.1799'))
+def test_play_quiz_incorrect(mock_get_random_person, mock_input, capsys):
+    from play_quiz import play_quiz
+    play_quiz()
+    captured = capsys.readouterr()
+    assert 'Неверно. Правильный ответ: 26.06.1799' in captured.out
