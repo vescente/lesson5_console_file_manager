@@ -48,3 +48,7 @@ def view_bank_account():
             break
         else:
             print('Invalid option')
+
+
+if __name__ == '__main__':
+    view_bank_account()
